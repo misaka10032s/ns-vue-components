@@ -21,6 +21,20 @@
 
     const i18nRoute = "devEntrance";
 
+    const links = [
+        {'name': 'NStable', 'url': 'NStable'},
+        {'name': 'NSrollingTable', 'url': 'NSrollingTable'},
+        {'name': 'NStriac', 'url': 'NStriac'},
+        {'name': 'NStoggle', 'url': 'NStoggle'},
+        {'name': 'webocr', 'url': 'webocr'},
+        {'name': 'preImage', 'url': 'preImage'},
+        {'name': 'NSimage3D', 'url': 'NSimage3D'},
+        {'name': 'NSform', 'url': 'NSform'},
+        {'name': 'NScarousel', 'url': 'NScarousel'},
+        {'name': 'NSimageEditor', 'url': 'NSimageEditor'},
+        {'name': 'trans', 'url': 'trans'},
+    ]
+
     onMounted(async () => {
         console.log(`@${i18nRoute}`);
     });
@@ -28,32 +42,8 @@
 
 <template>
     <div ref="$el">
-        <router-link :to="url_for('NStable')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NStable</button>
-        </router-link>
-        <router-link :to="url_for('NSrollingTable')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NSrollingTable</button>
-        </router-link>
-        <router-link :to="url_for('NStriac')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NStriac</button>
-        </router-link>
-        <router-link :to="url_for('NStoggle')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NStoggle</button>
-        </router-link>
-        <router-link :to="url_for('webocr')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">webocr</button>
-        </router-link>
-        <router-link :to="url_for('preImage')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">preImage</button>
-        </router-link>
-        <router-link :to="url_for('image3D')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">image3D</button>
-        </router-link>
-        <router-link :to="url_for('NSform')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NSform</button>
-        </router-link>
-        <router-link :to="url_for('NScarousel')" class="text-decoration-none">
-            <button class="btn mx-2 nav-baseline-sky">NScarousel</button>
+        <router-link :to="url_for(link.url)" class="text-decoration-none" v-for="link in links" :key="link.url">
+            <button class="btn mx-2 nav-baseline-sky">{{ link.name }}</button>
         </router-link>
 
         <router-view v-slot="{ Component }" class="router-view-grow">

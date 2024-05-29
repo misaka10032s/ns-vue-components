@@ -21,7 +21,8 @@ const props = defineProps({
         type: Object,
         default: () => {
             return {
-                // config
+                autoPlay: true,
+                delay: 5000,
             }
         }
     }

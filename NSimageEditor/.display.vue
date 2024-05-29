@@ -10,8 +10,8 @@
     import { supfnc } from '@/js/NSsupportFnc.js'
     import { HTTPreq } from '@/js/NSHTTPreq.js'
     import Swal from 'sweetalert2'
-
-    import image3D from './image3D.vue';
+    
+    import nsImageEditor from './nsImageEditor.vue'
 
     const $el = ref(null);
 
@@ -21,10 +21,11 @@
     const { t, locale } = useI18n();
     const [route, router] = [useRoute(), useRouter()];
 
-    const i18nRoute = "image3D.display";
+    const i18nRoute = "nsImageEditor.display";
 
-    const image = ref([0,1,2,3,4]);
-    const image2 = ref([[0,1,2,3], [4,5,6,7], [8,9,10,11]]);
+    const displayConfig = ref({
+        data: ["data1", "data2", "data3", "data4"],
+    });
 
     onMounted(async () => {
         console.log(`@${i18nRoute}`);
@@ -33,7 +34,7 @@
 
 <template>
     <div ref="$el">
-        <image3D :images="image2"/>
+        <ns-image-editor :config="displayConfig"/>
     </div>
 </template>
 

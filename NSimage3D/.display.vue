@@ -10,8 +10,8 @@
     import { supfnc } from '@/js/NSsupportFnc.js'
     import { HTTPreq } from '@/js/NSHTTPreq.js'
     import Swal from 'sweetalert2'
-    
-    import nsCarousel from './nsCarousel.vue'
+
+    import nsImage3D from './nsImage3D.vue';
 
     const $el = ref(null);
 
@@ -21,11 +21,10 @@
     const { t, locale } = useI18n();
     const [route, router] = [useRoute(), useRouter()];
 
-    const i18nRoute = "nsCarousel.display";
+    const i18nRoute = "nsImage3D.display";
 
-    const displayConfig = ref({
-        data: ["data1", "data2", "data3", "data4"],
-    });
+    const image = ref([0,1,2,3,4]);
+    const image2 = ref([[0,1,2,3], [4,5,6,7], [8,9,10,11]]);
 
     onMounted(async () => {
         console.log(`@${i18nRoute}`);
@@ -34,7 +33,7 @@
 
 <template>
     <div ref="$el">
-        <ns-carousel :config="displayConfig"/>
+        <nsImage3D :images="image2"/>
     </div>
 </template>
 
