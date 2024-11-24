@@ -58,6 +58,7 @@
                     <option :value="0">檢視</option>
                     <option :value="1">編輯</option>
                     <option :value="2">選擇</option>
+                    <option :value="3">移動</option>
                 </select>
 
                 <button class="export-btn" @click="emit('export')">

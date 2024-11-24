@@ -186,7 +186,7 @@
             console.log([...store.state.data].map(x => x.id));
             console.log([...dataClone.value].map(x => x.id));
 
-            // change the data
+            // update the data
             store.state.data = dataClone.value.slice();
 
             // reset the position of the dragging item
@@ -221,7 +221,7 @@
         store.state.cells.push($el.value);
         store.state.dragObj.push(dragItem.value[0]);
         
-        if(nowMode !== 1 || nowMode !== 3) dragItem.value[0].disable();
+        if(nowMode.value !== 3) dragItem.value[0].disable();
     });
 
     onUpdated(() => {
@@ -238,7 +238,7 @@
     });
 
     watch(() => nowMode.value, (nowMode) => {
-        if(nowMode === 1 || nowMode === 3){
+        if(nowMode === 3){
             dragItem.value[0].enable();
         } else {
             dragItem.value[0].disable();
@@ -252,6 +252,7 @@
             <input type="checkbox" v-model="celldata._selected">
         </div>
         <div>
+            <!-- @@@@ custom field -->
             {{ celldata }}
         </div>
     </div>

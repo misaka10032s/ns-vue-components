@@ -37,6 +37,10 @@
 
     const nowMode = computed(() => store.getters.nowMode);
 
+    const edit = () => {
+        store.commit("startEditRow", rowData.value);
+    }
+
     onMounted(async () => {
         console.log(`@${i18nRoute}`);
     });
@@ -45,11 +49,18 @@
 <template>
     <tr ref="$el" :class="{'data-row-view': nowMode===0}">
         <td v-if="nowMode===1" width="100">
-            <button class="action-btn edit" @click="store.state.editingRow=rowData">編輯</button>
+            <button class="action-btn edit" @click="edit()">編輯</button>
         </td>
 
         <td v-if="nowMode===2" width="50">
             <input class="action-checkbox" type="checkbox" v-model="rowData._selected"/>
+        </td>
+
+        <td v-if="nowMode===3" width="50">
+            <!-- move bar icon -->
+            <div class="d-flex justify-content-center p-2 btn">
+                <i class="fas fa-bars"></i>
+            </div>
         </td>
 
         <td v-if="showSerial">{{ index + 1 }}</td>

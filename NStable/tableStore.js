@@ -27,6 +27,7 @@ export default createStore({
 
             // 0: view, 1: edit, 2: select, 3: switch
             nowMode: 1,
+            enableMode: [0, 1, 2, 3],
 
             filters: [
                 // {
@@ -71,6 +72,9 @@ export default createStore({
                 state.sortDir = 1;
             }
         },
+        startEditRow(state, row) {
+            state.editingRow = row;
+        }
     },
     actions: {
         // data.state
@@ -189,6 +193,7 @@ export default createStore({
             return state.nowMode;
         },
 
+        // operations
         filters: state => {
             return state.filters;
         },
@@ -199,11 +204,15 @@ export default createStore({
             return state.actions;
         },
 
+        // modal
         editingRow: state => {
             return state.editingRow;
         },
         viewingRow: state => {
             return state.viewingRow;
+        },
+        showFloating: state => {
+            return state.viewingRow || state.editingRow;
         },
 
         cells: state => {

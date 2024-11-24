@@ -128,10 +128,6 @@
     });
 
     // methods
-    const showFloating = computed(() => {
-        return store.getters.viewingRow || store.getters.editingRow;
-    });
-
     const switchPageAll = (checked) => {
         const currentPage = store.getters.currentPage;
         const pageSize = store.getters.pageSize;
@@ -201,7 +197,7 @@
         <mainTable :data="dataInbox" @switchPageAll="x => switchPageAll(x)" @switchAll="x => switchAll(x)" @nodata="nodata()"></mainTable>
         <pagination :dataLength="sortedData.length"></pagination>
         <transition name="popup">
-            <modal v-if="showFloating"></modal>
+            <modal v-if="store.getters.showFloating"></modal>
         </transition>
     </div>
 </template>

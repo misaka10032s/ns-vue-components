@@ -146,9 +146,10 @@
                     <option :value="0">檢視 (外部)</option>
                     <option :value="1">編輯 (外部)</option>
                     <option :value="2">選擇 (外部)</option>
+                    <option :value="3">移動 (外部)</option>
                 </select>
             </div>
-            <!-- <ezTable :config="displayConfig" @nodata="nodata"></ezTable> -->
+            <ezTable :config="displayConfig" @nodata="nodata"></ezTable>
             <listTable :config="displayConfig" @nodata="nodata"></listTable>
         </div>
     </div>
