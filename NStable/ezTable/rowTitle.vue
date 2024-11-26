@@ -19,12 +19,16 @@
     const $titles = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         showCheckbox: {
             type: Boolean,
             default: false,
         },
     });
-    const { showCheckbox } = toRefs(props);
+    const {  tableID, showCheckbox } = toRefs(props);
     const { t, locale } = useI18n();
 
     const emit = defineEmits(["switchPageAll", "switchAll"]);
@@ -33,9 +37,8 @@
 
     const dragItemList = ref([]);
 
-    const nowMode = computed(() => store.getters.nowMode);
-    watch(() => store.getters.nowMode, (nowMode) => {
-
+    const nowMode = computed(() => store.getters.nowMode(tableID.value));
+    watch(() => nowMode.value, (nowMode) => {
         if(nowMode===1){
             dragItemList.value.forEach((item) => {
                 item[0].enable();
@@ -51,7 +54,7 @@
         console.log(`@${i18nRoute}`, $titles.value, $titles.value[0].$el);
 
         // deep copy the title order
-        const tmpTitleOrder = _.cloneDeep(store.getters.titleOrder);
+        const tmpTitleOrder = _.cloneDeep(store.getters.titleOrder(tableID.value));
         // register draggable for each row
         [...$titles.value].forEach((_row, index) => {
             const row = _row.$el;
@@ -78,7 +81,7 @@
                         r.$el.startX = r.$el.offsetLeft;
                         r.$el.index = i;
                     });
-                    store.state.titleOrder = _.cloneDeep(tmpTitleOrder);
+                    store.state.titleOrder[tableID.value] = _.cloneDeep(tmpTitleOrder);
 
                     gsap.to(this.target, { zIndex: 0, backgroundColor: "" }, 0.2);
                 },
@@ -152,7 +155,7 @@
                 }
             });
 
-            dragItem[0].disable();
+            if(nowMode.value !== 1) dragItem[0].disable();
             dragItemList.value.push(dragItem);
         });
     });
@@ -165,7 +168,7 @@
             <input class="action-checkbox" type="checkbox" @change="$event => emit('switchPageAll', $event.target.checked)"/>
         </th>
         <th class="sysetm-title" v-if="nowMode===3"></th>
-        <cellTitle ref="$titles" v-for="(column, index) in store.getters.titleOrder" :column="column"/>
+        <cellTitle ref="$titles" :tableID="tableID" v-for="(column, index) in store.getters.titleOrder(tableID)" :column="column"/>
     </tr>
 </template>
 

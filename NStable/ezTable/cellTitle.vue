@@ -13,12 +13,16 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         column: {
             type: Object,
             required: true,
         },
     });
-    const { column } = toRefs(props);
+    const { tableID, column } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.cell";
@@ -33,21 +37,21 @@
 <template>
     <th ref="$el" class="title-col">
         <template v-if="Array.isArray(column)">
-            <div v-for="col in column"  @click="store.commit('sort', col.key)">
+            <div v-for="col in column"  @click="store.commit('sort', {tableID, key: col.key})">
                 <span>
                     {{ col.text }}
-                    <template v-if="store.getters.sortKey === col.key">
-                        <i v-if="store.getters.sortDir > 0" class="fas fa-sort-up"></i>
+                    <template v-if="store.getters.sortKey(tableID) === col.key">
+                        <i v-if="store.getters.sortDir(tableID) > 0" class="fas fa-sort-up"></i>
                         <i v-else class="fas fa-sort-down"></i>
                     </template>
                 </span>
             </div>
         </template>
-        <div @click="store.commit('sort', column.key)">
+        <div @click="store.commit('sort', {tableID, key: column.key})">
             <span>
                 {{ column.text }}
-                <template v-if="store.getters.sortKey === column.key">
-                    <i v-if="store.getters.sortDir > 0" class="fas fa-sort-up"></i>
+                <template v-if="store.getters.sortKey(tableID) === column.key">
+                    <i v-if="store.getters.sortDir(tableID) > 0" class="fas fa-sort-up"></i>
                     <i v-else class="fas fa-sort-down"></i>
                 </template>
             </span>

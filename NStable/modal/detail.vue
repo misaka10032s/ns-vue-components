@@ -13,17 +13,21 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
     });
-    const { } = toRefs(props);
+    const { tableID } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.detail";
 
-    const viewingRow = computed(() => store.getters.viewingRow);
-    const titleOrder = computed(() => store.getters.titleOrder.flat());
+    const viewingRow = computed(() => store.getters.viewingRow(tableID.value));
+    const titleOrder = computed(() => store.getters.titleOrder(tableID.value).flat());
 
     const close = () => {
-        store.state.viewingRow = null;
+        store.state.viewingRow[tableID.value] = null;
     }
 
     onMounted(async () => {

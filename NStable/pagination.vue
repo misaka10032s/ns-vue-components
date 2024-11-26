@@ -13,6 +13,10 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         dataLength: {
             type: Number,
             default: 0
@@ -33,13 +37,13 @@
             default: true
         },
     });
-    const { dataLength, pageButtonLength, isShowFirstLast, isShowPrevNext } = toRefs(props);
+    const { tableID, dataLength, pageButtonLength, isShowFirstLast, isShowPrevNext } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.pagination";
 
-    const currentPage = computed(() => store.state.currentPage);
-    const pageSize = computed(() => store.state.pageSize);
+    const currentPage = computed(() => store.state.currentPage[tableID.value]);
+    const pageSize = computed(() => store.state.pageSize[tableID.value]);
     const maxPage = computed(() => Math.ceil(dataLength.value / pageSize.value));
     const pageButtonBox = computed(() => {
         const box = [];
@@ -56,7 +60,7 @@
         else if (page > maxPage.value) page = maxPage.value;
         
         if (currentPage.value !== page) {
-            store.state.currentPage = page;
+            store.state.currentPage[tableID.value] = page;
         }
     }
 

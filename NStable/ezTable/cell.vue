@@ -13,6 +13,10 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         index: {
             type: Number,
             required: true,
@@ -27,17 +31,17 @@
             default: "",
         },
     });
-    const { index, column, rowData } = toRefs(props);
+    const { tableID, index, column, rowData } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.cell";
 
     const emit = defineEmits(["edit"]);
 
-    const actions = computed(() => store.getters.actions);
+    const actions = computed(() => store.getters.actions(tableID.value));
 
     const doOperation = (operation, $event, rowData, col) => {
-        store.dispatch("rowInteraction", {operation, $event, rowData, col});
+        store.dispatch("rowInteraction", {tableID: tableID.value, operation, $event, rowData, col});
     };
 
     onMounted(async () => {

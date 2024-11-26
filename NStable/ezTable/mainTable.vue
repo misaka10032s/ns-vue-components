@@ -16,19 +16,23 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         data: {
             type: Array,
             default: () => []
         },
     });
-    const { data } = toRefs(props);
+    const { tableID, data } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.table";
 
     const emit = defineEmits(["switchPageAll", "switchAll", "nodata"]);
 
-    const nowMode = computed(() => store.getters.nowMode);
+    const nowMode = computed(() => store.getters.nowMode(tableID.value));
 
     const nodata = () => {
         emit("nodata");
@@ -42,14 +46,14 @@
 <template>
     <table ref="$el" class="main-table">
         <thead>
-            <rowTitle @switchPageAll="x => emit('switchPageAll', x)" @switchAll="x => emit('switchAll', x)"></rowTitle>
+            <rowTitle :tableID="tableID" @switchPageAll="x => emit('switchPageAll', x)" @switchAll="x => emit('switchAll', x)"></rowTitle>
         </thead>
         <tbody>
             <TransitionGroup name="fade">
-                <row v-for="(rowData, index) in data" :index="index" :rowData="rowData" :key="index"></row>
+                <row v-for="(rowData, index) in data" :tableID="tableID" :index="index" :rowData="rowData" :key="index"></row>
             </TransitionGroup>
             <tr v-if="!data.length">
-                <td :colspan="store.getters.titleOrder.length + !!nowMode">
+                <td :colspan="store.getters.titleOrder(tableID).length + !!nowMode">
                     <div>
                         <span>noData</span>
                         <i class="fas fa-sync-alt mx-2" role="button" @click="nodata"></i>

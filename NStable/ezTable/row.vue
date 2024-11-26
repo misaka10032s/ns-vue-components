@@ -15,30 +15,32 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         index: {
             type: Number,
             required: true,
         },
-
         rowData: {
             type: Object,
             default: () => {},
         },
-
         showSerial: {
             type: Boolean,
             default: false,
         },
     });
-    const { index, rowData, showSerial } = toRefs(props);
+    const { tableID, index, rowData, showSerial } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.row";
 
-    const nowMode = computed(() => store.getters.nowMode);
+    const nowMode = computed(() => store.getters.nowMode(tableID.value));
 
     const edit = () => {
-        store.commit("startEditRow", rowData.value);
+        store.commit("startEditRow", {tableID: tableID.value, row: rowData.value});
     }
 
     onMounted(async () => {
@@ -65,7 +67,7 @@
 
         <td v-if="showSerial">{{ index + 1 }}</td>
 
-        <cell v-for="column in store.getters.titleOrder" :index="index" :column="column" :rowData="rowData"/>
+        <cell v-for="column in store.getters.titleOrder(tableID)" :tableID="tableID" :index="index" :column="column" :rowData="rowData"/>
     </tr>
 </template>
 

@@ -13,8 +13,12 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
     });
-    const { } = toRefs(props);
+    const { tableID } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.actions";
@@ -24,7 +28,7 @@
     const groupOrder = ref([]);
     const filterGroups = computed(() => {
         const res = {};
-        store.state.filters.forEach(filter => {
+        store.getters.filters(tableID.value).forEach(filter => {
             // if 'group' in filter, place it in the group
             const groupName = 'group' in filter ? filter.group : 'default';
             
@@ -38,15 +42,14 @@
         return res;
     });
 
-    const selectedRows = computed(() => store.state.data.filter(row => row._selected));
+    const selectedRows = computed(() => store.getters.data(tableID.value).filter(row => row._selected));
 
     const doOperation = (operation) => {
-        store.dispatch("selectedOperation", {operation, selectedRows: selectedRows.value});
+        store.dispatch("selectedOperation", {tableID: tableID.value, operation, selectedRows: selectedRows.value});
     };
 
     onMounted(async () => {
-        console.log(`@${i18nRoute}`);
-        filterGroups.value;
+        console.log(`@${i18nRoute}`, filterGroups.value);
     });
 </script>
 
@@ -54,7 +57,7 @@
     <div ref="$el">
         <div class="basic-operation">
             <div class="default-group">
-                <select class="table-mode-select" v-model="store.state.nowMode">
+                <select class="table-mode-select" v-model="store.state.nowMode[tableID]">
                     <option :value="0">檢視</option>
                     <option :value="1">編輯</option>
                     <option :value="2">選擇</option>
@@ -81,7 +84,7 @@
         <div class="selected-rows-operation">
             <template v-if="selectedRows.length">
                 <span>已選 {{ selectedRows.length }} 筆資料</span>
-                <button v-for="ctx in store.getters.select" @click="doOperation(ctx)">
+                <button v-for="ctx in store.getters.select(tableID)" @click="doOperation(ctx)">
                     <i :class="ctx.icon" alt="icon" v-if="ctx.icon"></i>
                     <img :src="ctx.image" alt="icon" v-else-if="ctx.image">
                     <span v-else-if="!ctx.text">{{ ctx.name }}</span>

@@ -15,20 +15,24 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
     });
-    const { } = toRefs(props);
+    const { tableID } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.editing";
 
-    const titleOrder = computed(() => store.getters.titleOrder.flat());
-    const editingRow = computed(() => store.getters.editingRow);
+    const titleOrder = computed(() => store.getters.titleOrder(tableID.value).flat());
+    const editingRow = computed(() => store.getters.editingRow(tableID.value));
     const editingRow_clone = ref({});
 
     const comfirm = () => {
-        console.log(store.getters.editingRow, editingRow_clone.value)
-        Object.assign(store.getters.editingRow, editingRow_clone.value);
-        store.state.editingRow = null;
+        console.log(store.state.editingRow[tableID.value], editingRow_clone.value)
+        Object.assign(store.state.editingRow[tableID.value], editingRow_clone.value);
+        store.state.editingRow[tableID.value] = null;
     }
 
     const reset = () => {
@@ -36,10 +40,10 @@
     }
 
     const cancel = () => {
-        store.state.editingRow = null;
+        store.state.editingRow[tableID.value] = null;
     }
 
-    watch(() => store.getters.editingRow, (editingRow) => {
+    watch(() => store.getters.editingRow(tableID.value), (editingRow) => {
         editingRow_clone.value = _.cloneDeep(editingRow);
     }, { immediate: true });
 

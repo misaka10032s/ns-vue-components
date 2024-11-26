@@ -17,12 +17,16 @@
     const $block = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         movable: {
             type: Boolean,
             default: true
         }
     });
-    const { movable } = toRefs(props);
+    const { tableID, movable } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.modal";
@@ -41,8 +45,8 @@
     }
 
     const close = () => {
-        store.state.viewingRow = null;
-        store.state.editingRow = null;
+        store.state.viewingRow[tableID.value] = null;
+        store.state.editingRow[tableID.value] = null;
     }
 
     onMounted(async () => {
@@ -87,8 +91,8 @@
                 <button @click="close()"><i class="fas fa-times"></i></button>
             </div>
             <div class="floating-content">
-                <detail v-if="store.getters.viewingRow"></detail>
-                <editing v-else-if="store.getters.editingRow"></editing>
+                <detail v-if="store.getters.viewingRow(tableID)" :tableID="tableID"></detail>
+                <editing v-else-if="store.getters.editingRow(tableID)" :tableID="tableID"></editing>
             </div>
         </div>
     </div>

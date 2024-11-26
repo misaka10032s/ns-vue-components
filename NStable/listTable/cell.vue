@@ -16,24 +16,28 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         celldata: {
             type: Object,
             default: () => {},
         },
     });
-    const { celldata } = toRefs(props);
+    const { tableID, celldata } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.listTable.cell";
 
 
-    const actions = computed(() => store.getters.actions);
+    const actions = computed(() => store.getters.actions(tableID.value));
 
     const doOperation = (operation, $event, celldata) => {
-        store.dispatch("cellInteraction", {operation, $event, celldata});
+        store.dispatch("cellInteraction", {tableID: tableID.value, operation, $event, celldata});
     };
 
-    const nowMode = computed(() => store.getters.nowMode);
+    const nowMode = computed(() => store.getters.nowMode(tableID.value));
     const dragItem = ref(null);
     const dataClone = ref([]);
 
@@ -53,16 +57,18 @@
         console.log(`@${i18nRoute}`);
         initInfo($el.value);
 
+        const cells = store.getters.cells(tableID.value);
+
         const onDrag = (e) => {
             // console.log('dragging', e);
-            for(let i = 0; i < store.getters.cells.length; i++){
+            for(let i = 0; i < cells.length; i++){
                 const myCell = $el.value;
                 const myIndex = myCell.index;
-                const targetCell = store.getters.cells[i];
+                const targetCell = cells[i];
                 const targetIndex = targetCell.index;
 
-                if(store.getters.cells[i] != e.target && dragItem.value[0].hitTest(store.getters.cells[i], "25%") && !targetCell.isMoving){
-                    console.log('hit', [...store.getters.cells].map(x => x.index));
+                if(cells[i] != e.target && dragItem.value[0].hitTest(cells[i], "25%") && !targetCell.isMoving){
+                    console.log('hit', [...cells].map(x => x.index));
 
                     console.log('hittttt ', e.target, myIndex, targetIndex, myCell, targetCell);
 
@@ -71,8 +77,8 @@
                             // change the info of effected cells
                             const [lastEffectedCellX, lastEffectedCellY, lastEffectedCellindex] = [targetCell.startX, targetCell.startY, targetIndex];
                             for(let j = targetIndex; j > myIndex; j--){
-                                const cell = store.getters.cells[j];
-                                const prevCell = store.getters.cells[j-1];
+                                const cell = cells[j];
+                                const prevCell = cells[j-1];
 
                                 const dx = prevCell.startX - cell.startX;
                                 const dy = prevCell.startY - cell.startY;
@@ -97,19 +103,19 @@
                             myCell.index = lastEffectedCellindex;
 
                             // insert to the front of target
-                            store.state.cells.splice(targetIndex, 0, store.state.cells.splice(myIndex, 1)[0]);
-                            store.state.dragObj.splice(targetIndex, 0, store.state.dragObj.splice(myIndex, 1)[0]);
+                            store.state.cells[tableID.value].splice(targetIndex, 0, store.state.cells[tableID.value].splice(myIndex, 1)[0]);
+                            store.state.dragObj[tableID.value].splice(targetIndex, 0, store.state.dragObj[tableID.value].splice(myIndex, 1)[0]);
                             const myDataIndex = _.indexOf(dataClone.value, myCell.data);
                             const targetDataIndex = _.indexOf(dataClone.value, targetCell.data);
                             dataClone.value.splice(targetDataIndex, 0, dataClone.value.splice(myDataIndex, 1)[0]);
-                            // console.log([...store.getters.cells].map(x => x.index));
+                            // console.log([...cells].map(x => x.index));
                         }
                         else {
                             // change the info of effected cells
                             const [firstEffectedCellX, firstEffectedCellY, firstEffectedCellindex] = [targetCell.startX, targetCell.startY, targetIndex];
                             for(let j = targetIndex; j < myIndex; j++){
-                                const cell = store.getters.cells[j];
-                                const nextCell = store.getters.cells[j+1];
+                                const cell = cells[j];
+                                const nextCell = cells[j+1];
 
                                 const dx = nextCell.startX - cell.startX;
                                 const dy = nextCell.startY - cell.startY;
@@ -134,17 +140,17 @@
                             myCell.index = firstEffectedCellindex;
 
                             // insert to the back of target
-                            store.state.cells.splice(targetIndex, 0, store.state.cells.splice(myIndex, 1)[0]);
-                            store.state.dragObj.splice(targetIndex, 0, store.state.dragObj.splice(myIndex, 1)[0]);
+                            store.state.cells[tableID.value].splice(targetIndex, 0, store.state.cells[tableID.value].splice(myIndex, 1)[0]);
+                            store.state.dragObj[tableID.value].splice(targetIndex, 0, store.state.dragObj[tableID.value].splice(myIndex, 1)[0]);
                             const myDataIndex = _.indexOf(dataClone.value, myCell.data);
                             const targetDataIndex = _.indexOf(dataClone.value, targetCell.data);
                             dataClone.value.splice(targetDataIndex, 0, dataClone.value.splice(myDataIndex, 1)[0]);
-                            // console.log([...store.getters.cells].map(x => x.index));
+                            // console.log([...cells].map(x => x.index));
                         }
                     }
                     else if(nowMode.value === 3){
                         // change the info of effected cells
-                        const cell = store.getters.cells[targetIndex];
+                        const cell = cells[targetIndex];
 
                         const dx = myCell.startX - cell.startX;
                         const dy = myCell.startY - cell.startY;
@@ -164,8 +170,8 @@
                         [myCell.startY, targetCell.startY] = [targetCell.startY, myCell.startY];
                         
                         // swap the data
-                        [store.state.cells[myIndex], store.state.cells[targetIndex]] = [store.state.cells[targetIndex], store.state.cells[myIndex]];
-                        [store.state.dragObj[myIndex], store.state.dragObj[targetIndex]] = [store.state.dragObj[targetIndex], store.state.dragObj[myIndex]];
+                        [store.state.cells[tableID.value][myIndex], store.state.cells[tableID.value][targetIndex]] = [store.state.cells[tableID.value][targetIndex], store.state.cells[tableID.value][myIndex]];
+                        [store.state.dragObj[tableID.value][myIndex], store.state.dragObj[tableID.value][targetIndex]] = [store.state.dragObj[tableID.value][targetIndex], store.state.dragObj[tableID.value][myIndex]];
                         const myDataIndex = _.indexOf(dataClone.value, myCell.data);
                         const targetDataIndex = _.indexOf(dataClone.value, targetCell.data);
                         [dataClone.value[myDataIndex], dataClone.value[targetDataIndex]] = [dataClone.value[targetDataIndex], dataClone.value[myDataIndex]];
@@ -177,20 +183,20 @@
             }
         }
         const onPress = (e) => {
-            console.log(e, store.getters.cells, store.getters.cells.indexOf(e.target));
+            console.log(e, cells, cells.indexOf(e.target));
 
-            dataClone.value = store.getters.data.slice();
+            dataClone.value = store.getters.data(tableID.value).slice();
         }
         const onRelease = (e) => {
             console.log(e);
-            console.log([...store.state.data].map(x => x.id));
+            console.log([...store.state.data[tableID.value]].map(x => x.id));
             console.log([...dataClone.value].map(x => x.id));
 
             // update the data
-            store.state.data = dataClone.value.slice();
+            store.state.data[tableID.value] = dataClone.value.slice();
 
             // reset the position of the dragging item
-            store.getters.cells.forEach(cell => {
+            cells.forEach(cell => {
                 // if cell is moving, skip
                 // if(cell.isMoving) return;
                 initInfo(cell);
@@ -207,8 +213,8 @@
                     }
                 });
             });
-            store.getters.cells.sort((a, b) => a.index - b.index);
-            console.log([...store.getters.cells].map(x => x.index));
+            cells.sort((a, b) => a.index - b.index);
+            console.log([...cells].map(x => x.index));
         }
 
         dragItem.value = Draggable.create($el.value, {
@@ -218,10 +224,10 @@
             zIndexBoost: false
         });
 
-        store.state.cells.push($el.value);
-        store.state.dragObj.push(dragItem.value[0]);
+        store.state.cells[tableID.value].push($el.value);
+        store.state.dragObj[tableID.value].push(dragItem.value[0]);
         
-        if(nowMode.value !== 3) dragItem.value[0].disable();
+        if(nowMode.value !== 1 && nowMode.value !== 3) dragItem.value[0].disable();
     });
 
     onUpdated(() => {
@@ -233,12 +239,12 @@
     onBeforeUnmount(() => {
         console.log('unmounted');
 
-        store.state.cells = store.state.cells.filter(item => item !== $el.value);
-        store.state.dragObj = store.state.dragObj.filter(item => item !== dragItem.value[0]);
+        store.state.cells[tableID.value] = store.state.cells[tableID.value].filter(item => item !== $el.value);
+        store.state.dragObj[tableID.value] = store.state.dragObj[tableID.value].filter(item => item !== dragItem.value[0]);
     });
 
     watch(() => nowMode.value, (nowMode) => {
-        if(nowMode === 3){
+        if(nowMode === 1 || nowMode === 3){
             dragItem.value[0].enable();
         } else {
             dragItem.value[0].disable();

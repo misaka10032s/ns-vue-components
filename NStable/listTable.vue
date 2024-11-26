@@ -10,8 +10,6 @@
 
     import store from './tableStore.js'
 
-    import _ from 'lodash'
-
     import mainTable from './listTable/mainTable.vue'
     import operations from './operations.vue'
     import seachBar from './searchBar.vue'
@@ -34,73 +32,23 @@
 
     const emit = defineEmits(["nodata", "export"]);
 
+    const tableID = config.value.tableID || Math.random().toString(36).substring(2);
+    const tableHash = Math.random().toString(36).substring(2);
     const data = computed(() => config.value.data || []);
     const titleOrder = computed(() => config.value.titleOrder || []);
     const filters = computed(() => config.value.filters || []);
     const select = computed(() => config.value.select || []);
     const actions = computed(() => config.value.actions || []);
     const tableMode = computed(() => config.value.tableMode || 0);
-
-    // init store
-    // add index to data
-    const initData = () => {
-        store.state.data = data.value.map((row, index) => {
-            const _row = _.cloneDeep(row);
-            return {
-                ..._row,
-                _index: index,
-                _selected: false,
-            };
-        });
-    }
-
-    const initTitleOrder = () => {
-        store.state.titleOrder = titleOrder.value.map(title => {
-            if (typeof title === "string") {
-                return {
-                    key: title,
-                    text: title,
-                };
-            }
-            else if (Array.isArray(title)) {
-                return title.map(k => {
-                    return {
-                        key: k,
-                        text: k,
-                    };
-                });
-            }
-            return title;
-        });
-    }
-    
-    const initFilters = () => {
-        store.state.filters = filters.value.map(filter => {
-            return {
-                ...filter,
-                status: 0,
-            };
-        });
-    }
-
-    const initSelect = () => {
-        store.state.select = select.value.map(filter => {
-            return {
-                ...filter,
-                status: 0,
-            };
-        });
-    }
-
-    const initActions = () => {
-        Object.assign(store.state.actions, actions.value);
-    }
+    const enableMode = computed(() => config.value.enableMode || [0, 1, 2, 3]);
 
     // init data
+    store.commit("initTable", {tableID, tableHash});
+    
     const dataFileredCustom = computed(() => {
-        return store.getters.data.filter(row => {
-            return store.getters.filters.every(filter => {
-                return filter.status === 0 || filter.func(row);
+        return store.getters.data(tableID).filter(row => {
+            return store.getters.filters(tableID).every(filter => {
+                return !filter.status || filter.func(row);
             });
         });
     });
@@ -108,29 +56,31 @@
     const dataFilered = computed(() => {
         return dataFileredCustom.value.filter(row => {
             return Object.values(row).some(cell => {
-                return String(cell).toLowerCase().includes(store.getters.searchText.toLowerCase());
+                return String(cell).toLowerCase().includes(store.getters.searchText(tableID).toLowerCase());
             });
         });
     });
 
     const sortedData = computed(() => {
-        if(store.getters.sortKey === "") return dataFilered.value.slice();
+        if(store.getters.sortKey(tableID) === "") return dataFilered.value.slice();
+
+        const [sortKey, sortDir] = [store.getters.sortKey(tableID), store.getters.sortDir(tableID)];
         
         return dataFilered.value.slice().sort((a, b) => {
-            const Avalue = Number.isNaN(Number(a[store.getters.sortKey])) ? a[store.getters.sortKey] : Number(a[store.getters.sortKey]);
-            const Bvalue = Number.isNaN(Number(b[store.getters.sortKey])) ? b[store.getters.sortKey] : Number(b[store.getters.sortKey]);
-            return Avalue > Bvalue ? store.getters.sortDir : -store.getters.sortDir;
+            const Avalue = Number.isNaN(Number(a[sortKey])) ? a[sortKey] : Number(a[sortKey]);
+            const Bvalue = Number.isNaN(Number(b[sortKey])) ? b[sortKey] : Number(b[sortKey]);
+            return Avalue > Bvalue ? sortDir : -sortDir;
         });
     });
 
     const dataInbox = computed(() => {
-        return sortedData.value.slice((store.getters.currentPage - 1) * store.getters.pageSize, store.getters.currentPage * store.getters.pageSize);
+        const [currentPage, pageSize] = [store.getters.currentPage(tableID), store.getters.pageSize(tableID)];
+        return sortedData.value.slice((currentPage - 1) * pageSize, currentPage * pageSize);
     });
 
     // methods
     const switchPageAll = (checked) => {
-        const currentPage = store.getters.currentPage;
-        const pageSize = store.getters.pageSize;
+        const [currentPage, pageSize] = [store.getters.currentPage(tableID), store.getters.pageSize(tableID)];
 
         for(let i = (currentPage - 1) * pageSize; i < currentPage * pageSize; i++){
             if(i >= sortedData.value.length) break;
@@ -145,13 +95,11 @@
     };
 
     const switchRealAll = (checked) => {
-        store.state.data.forEach(row => {
-            row._selected = checked;
-        });
+        store.commit("switchRealAll", {tableID, checked});
     };
 
     const exportData = () => {
-        emit("export", store.getters.data);
+        emit("export", store.getters.data(tableID));
     };
 
     const nodata = () => {
@@ -165,39 +113,43 @@
         console.log(`@${i18nRoute}`);
     });
 
-    watch(() => data.value, (val) => {
-        initData();
+    watch(() => data.value, (data) => {
+        store.commit("updateData", {tableID, tableHash, data});
     }, { deep: true, immediate: true });
 
-    watch(() => titleOrder.value, (val) => {
-        initTitleOrder();
+    watch(() => titleOrder.value, (titleOrder) => {
+        store.commit("updateTitleOrder", {tableID, tableHash, titleOrder});
     }, { deep: true, immediate: true });
 
-    watch(() => filters.value, (val) => {
-        initFilters();
+    watch(() => filters.value, (filters) => {
+        store.commit("updateFilters", {tableID, tableHash, filters});
     }, { deep: true, immediate: true });
 
-    watch(() => select.value, (val) => {
-        initSelect();
+    watch(() => select.value, (select) => {
+        store.commit("updateSelect", {tableID, tableHash, select});
     }, { deep: true, immediate: true });
 
-    watch(() => actions.value, (val) => {
-        initActions();
+    watch(() => actions.value, (actions) => {
+        store.commit("updateActions", {tableID, tableHash, actions});
     }, { deep: true, immediate: true });
 
-    watch(() => tableMode.value, (val) => {
-        store.state.nowMode = val;
+    watch(() => tableMode.value, (nowMode) => {
+        store.commit("updateNowMode", {tableID, tableHash, nowMode});
+    });
+
+    watch(() => enableMode.value, (enableMode) => {
+        store.commit("updateEnableMode", {tableID, tableHash, enableMode});
     });
 </script>
 
 <template>
     <div ref="$el" class="table-wrapper">
-        <operations @export="exportData()"></operations>
-        <seachBar @search="text => store.state.searchText=text"></seachBar>
-        <mainTable :data="dataInbox" @switchPageAll="x => switchPageAll(x)" @switchAll="x => switchAll(x)" @nodata="nodata()"></mainTable>
-        <pagination :dataLength="sortedData.length"></pagination>
+        <operations :tableID="tableID" @export="exportData()"></operations>
+        <seachBar @search="text => store.commit('searchText', {tableID, text})"></seachBar>
+        <mainTable :tableID="tableID" :data="dataInbox" @switchPageAll="x => switchPageAll(x)" @switchAll="x => switchAll(x)" @nodata="nodata()"></mainTable>
+        <pagination :tableID="tableID" :dataLength="sortedData.length"></pagination>
         <transition name="popup">
-            <modal v-if="store.getters.showFloating"></modal>
+            <modal :tableID="tableID" v-if="store.getters.showFloating(tableID)"></modal>
         </transition>
     </div>
 </template>

@@ -15,19 +15,23 @@
     const $el = ref(null);
 
     const props = defineProps({
+        tableID: {
+            type: String,
+            required: true,
+        },
         data: {
             type: Array,
             default: () => []
         },
     });
-    const { data } = toRefs(props);
+    const { tableID, data } = toRefs(props);
     const { t, locale } = useI18n();
 
     const i18nRoute = "NSeztable.listTable.mainTable";
 
     const emit = defineEmits(["switchPageAll", "switchAll", "nodata"]);
 
-    const nowMode = computed(() => store.getters.nowMode);
+    const nowMode = computed(() => store.getters.nowMode(tableID.value));
 
     const nodata = () => {
         emit("nodata");
@@ -41,7 +45,7 @@
 <template>
     <div ref="$el" class="main-table">
         <transition-group name="list">
-            <cell v-for="(celldata, index) in data" :celldata="celldata" :key="index"></cell>
+            <cell v-for="(celldata, index) in data" :tableID="tableID" :celldata="celldata" :key="index"></cell>
         </transition-group>
         <div v-if="!data.length">
             <span>noData</span>
