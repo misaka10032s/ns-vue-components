@@ -164,6 +164,7 @@ export default createStore({
         updateNowMode(state, {tableID, tableHash, nowMode}) {
             if(!state.tablesToUpdate.has(tableHash)) return;
             
+            if(!state.enableMode[tableID].includes(nowMode)) return;
             state.nowMode[tableID] = nowMode;
         },
         updateEnableMode(state, {tableID, tableHash, enableMode}) {
